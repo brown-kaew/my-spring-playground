@@ -1,1 +1,9 @@
-spring.application.name: try-testcontainer
+spring:
+  application:
+    name: try-testcontainer
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
