@@ -35,7 +35,7 @@ public class ProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Profile>> getprofiles() {
+    public ResponseEntity<List<Profile>> getProfiles() {
         List<Profile> profiles = profileService.getAllProfiles();
         return ResponseEntity.ok(profiles);
     }
