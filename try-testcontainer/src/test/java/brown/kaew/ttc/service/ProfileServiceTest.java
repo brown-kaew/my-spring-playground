@@ -20,7 +20,7 @@ import org.testcontainers.utility.DockerImageName;
 class ProfileServiceTest {
 
     @Container
-    static MySQLContainer mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:5.7.34"));
+    static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:5.7.34"));
 
     @DynamicPropertySource
     static void configureTestProperties(DynamicPropertyRegistry registry) {

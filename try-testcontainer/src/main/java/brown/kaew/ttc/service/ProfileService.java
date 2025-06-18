@@ -21,4 +21,25 @@ public class ProfileService {
     public List<Profile> getAllProfiles() {
         return profileRepository.findAll();
     }
+
+    public Profile createProfile(Profile profile) {
+        profile.setId(null); // Ensure the ID is null for new profiles
+        return profileRepository.save(profile);
+    }
+
+    public Profile updateProfile(Long id, Profile profile) {
+        if (!profileRepository.existsById(id)) {
+            throw new IllegalArgumentException("Profile not found");
+        }
+        profile.setId(id); // Set the ID for the existing profile
+        return profileRepository.save(profile);
+    }
+
+    public void deleteProfile(Long id) {
+        if (!profileRepository.existsById(id)) {
+            throw new IllegalArgumentException("Profile not found");
+        }
+        profileRepository.deleteById(id);
+    }
+
 }
