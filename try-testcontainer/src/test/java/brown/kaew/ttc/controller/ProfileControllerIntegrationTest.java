@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -26,17 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProfileControllerIntegrationTest {
 
     @Container
+    @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:5.7.34"));
-
-    @DynamicPropertySource
-    static void configureTestProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () -> mySQLContainer.getJdbcUrl());
-        registry.add("spring.datasource.username", () -> mySQLContainer.getUsername());
-        registry.add("spring.datasource.password", () -> mySQLContainer.getPassword());
-        registry.add("spring.sql.init.mode", () -> "always");
-        registry.add("spring.sql.init.platform", () -> "mysql");
-
-    }
 
     @Autowired
     private MockMvc mockMvc;

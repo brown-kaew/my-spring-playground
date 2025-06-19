@@ -6,4 +6,7 @@ spring:
     username: myuser
     password: secret
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  sql:
+    init:
+      mode: never
+      platform: mysql
