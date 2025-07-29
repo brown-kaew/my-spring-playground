@@ -16,7 +16,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
-class ProfileServiceTest {
+class ProfileServiceIT {
 
     @Container
     @ServiceConnection

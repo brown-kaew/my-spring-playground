@@ -2,7 +2,7 @@ services:
   db:
     image: mysql:5.7.34 # Specifies the MySQL image and version to use
     container_name: mysql_db # Assigns a custom name to the container
-    restart: always # Ensures the container restarts automatically if it crashes
+    restart: unless-stopped # Ensures the container restarts automatically if it crashes
     environment:
       MYSQL_ROOT_PASSWORD: your_root_password # Sets the root user's password
       MYSQL_DATABASE: mydatabase # Creates a database with this name

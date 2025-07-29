@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @AutoConfigureMockMvc
-class ProfileControllerIntegrationTest {
+class ProfileControllerIT {
 
     @Container
     @ServiceConnection
