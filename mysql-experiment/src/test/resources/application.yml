@@ -1,7 +1,7 @@
 spring:
   application:
     name: mysql-experiment
-  sql:
-    init:
-      mode: always
-      platform: mysql
+#  sql:
+#    init:
+#      mode: always
+#      platform: mysql

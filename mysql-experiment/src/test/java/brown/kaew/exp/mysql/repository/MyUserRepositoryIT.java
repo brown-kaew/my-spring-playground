@@ -12,14 +12,17 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 class MyUserRepositoryIT {
+
     @Container
     @ServiceConnection
-    static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:5.7.34"));
-
+    static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0.41"))
+            .withCopyFileToContainer(MountableFile.forClasspathResource("schema-mysql.sql"),
+                    "/docker-entrypoint-initdb.d/schema.sql");
     @Autowired
     MyUserRepository myUserRepository;
 
