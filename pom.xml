@@ -12,6 +12,7 @@
 
     <modules>
         <module>try-testcontainer</module>
+        <module>mysql-experiment</module>
     </modules>
 
 </project>
