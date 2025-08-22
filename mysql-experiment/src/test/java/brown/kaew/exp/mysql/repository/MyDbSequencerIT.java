@@ -2,6 +2,7 @@ package brown.kaew.exp.mysql.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
@@ -120,4 +121,39 @@ class MyDbSequencerIT {
             assertEquals(10, count.get(i), "Count for key " + i + " should be 10");
         }
     }
+
+    @Test
+    void updateNextVal_defaultMax10_expectCycledValueBetween0to9() {
+        String testSequence = "my_sequence_update_next_val";
+        myDbSequencer.createSequence(testSequence);
+
+        for (int expectNext = 0; expectNext < 10; expectNext++) {
+            Long next = myDbSequencer.updateNextVal(testSequence);
+            assertEquals(expectNext, next);
+        }
+
+        Long result = myDbSequencer.updateNextVal(testSequence);
+        assertEquals(0L, result, "The 11th round of the nextVal should be cycled to 0");
+    }
+
+    @Test
+    void nextVals_withMax100_expectCycledValueBetween0to99() {
+        String testSequence = "my_sequence_update_next_vals";
+        myDbSequencer.createSequence(testSequence, 100L);
+
+        // Act and Assert
+        // Get 10 values (0 to 9)
+        List<Long> nextVals = myDbSequencer.nextVals(testSequence, 10);
+        assertEquals(10, nextVals.size(), "Should return 10 values");
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, nextVals.get(i), "Value at index " + i + " should be " + i);
+        }
+        // Get another 10 values (10 to 19)
+        nextVals = myDbSequencer.nextVals(testSequence, 10);
+        assertEquals(10, nextVals.size(), "Should return another 10 values");
+        for (int i = 0; i < 10; i++) {
+            assertEquals(10 + i, nextVals.get(i), "Value at index " + i + " should be " + i);
+        }
+    }
+
 }

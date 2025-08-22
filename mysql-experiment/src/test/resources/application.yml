@@ -5,3 +5,8 @@ spring:
 #    init:
 #      mode: always
 #      platform: mysql
+
+logging:
+  level:
+    'com.zaxxer.hikari': DEBUG
+    'org.springframework.jdbc': DEBUG
