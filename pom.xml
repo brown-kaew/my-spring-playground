@@ -13,6 +13,7 @@
     <modules>
         <module>try-testcontainer</module>
         <module>mysql-experiment</module>
+        <module>db.migration-flyway</module>
     </modules>
 
 </project>
