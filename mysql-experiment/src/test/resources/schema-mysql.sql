@@ -7,28 +7,42 @@ CREATE TABLE IF NOT EXISTS my_user (
     email VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sequences
+CREATE TABLE sequence
 (
     name      VARCHAR(255)      NOT NULL,
-    current_value   BIGINT UNSIGNED   NOT NULL DEFAULT 0,
+    cur_val   BIGINT UNSIGNED   NOT NULL DEFAULT 0,
     increment SMALLINT UNSIGNED NOT NULL DEFAULT 1,
-    max_value BIGINT UNSIGNED NOT NULL DEFAULT 18446744073709551615,
+    max_val   BIGINT UNSIGNED   NOT NULL DEFAULT 9223372036854775807,
     PRIMARY KEY (name)
 );
 
 DELIMITER //
-CREATE FUNCTION IF NOT EXISTS next_value (seq_name VARCHAR(255))
+CREATE FUNCTION next_val (seq_name VARCHAR(255))
 RETURNS BIGINT UNSIGNED NOT DETERMINISTIC
 BEGIN
     DECLARE next BIGINT UNSIGNED;
 
-    UPDATE sequences
-    SET current_value = last_insert_id(((current_value) % max_value) + increment)
+    UPDATE sequence
+    SET cur_val = last_insert_id((cur_val + increment) % max_val)
     WHERE name = seq_name;
 
-    SELECT last_insert_id() AS current_value
-    INTO next;
+    SELECT last_insert_id() AS cur_val INTO next;
 
-    RETURN next - 1;
+    RETURN next;
 END//
 DELIMITER ;
+
+CREATE TABLE seq_1_to_1000
+(
+    id INT UNSIGNED NOT NULL PRIMARY KEY
+);
+
+INSERT INTO seq_1_to_1000 (id)
+SELECT * FROM
+(
+	WITH RECURSIVE numbers (n) AS (
+	  SELECT 1
+	  UNION ALL
+	  SELECT n + 1 FROM numbers WHERE n < 1000
+	)SELECT n FROM numbers
+) AS numbers;

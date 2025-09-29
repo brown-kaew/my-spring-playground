@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -26,33 +29,33 @@ class MyDbSequencerIT {
                     "/docker-entrypoint-initdb.d/schema.sql");
 
     @Autowired
-    MyDbSequencer myDbSequencer;
+    JdbcTemplate jdbcTemplate;
 
     @Test
     void createSequence() {
-        assertDoesNotThrow(() -> myDbSequencer.createSequence("test_create_sequence"));
+        MyDbSequencer testCreateSequence = new MyDbSequencer(this.jdbcTemplate, "test_create_sequence");
+        assertDoesNotThrow(testCreateSequence::init);
     }
 
     @Test
-    void nextVal_defaultMax10_expectCycledValueBetween0to9() {
-        String testSequence = "my_sequence";
-        myDbSequencer.createSequence(testSequence);
-        for (int expectNext = 0; expectNext < 10; expectNext++) {
-            Long next = myDbSequencer.nextVal(testSequence);
+    void nextVal_withMax10_expectCycledValueBetween0to9() {
+        MyDbSequencer myDbSequencer = new MyDbSequencer(this.jdbcTemplate, "my_sequence", 10);
+        myDbSequencer.init();
+
+        for (int expectNext : List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)) {
+            Long next = myDbSequencer.nextVal();
             assertEquals(expectNext, next);
         }
-
-        Long result = myDbSequencer.nextVal(testSequence);
-        assertEquals(0L, result, "The 11th round of the nextVal should be cycled to 0");
     }
 
     @Test
     void nextVal_withConcurrentAccess1000Threads_expectValueIsRepeated10Each() {
         // Arrange: Create a sequence and prepare a map to count occurrences
-        int defaultMaxValue = 10;
-        Map<Long, Integer> count = new ConcurrentHashMap<>(defaultMaxValue);
-        String testSequence = "my_sequence_concurrent_default_max_value";
-        myDbSequencer.createSequence(testSequence);
+        int maxValue = 10;
+        Map<Long, Integer> count = new ConcurrentHashMap<>(maxValue);
+        MyDbSequencer myDbSequencer = new MyDbSequencer(this.jdbcTemplate, "my_sequence_concurrent_default_max_value",
+                maxValue);
+        myDbSequencer.init();
 
         // Act: Start threads, each calling nextVal on the sequence
         // and counting occurrences of each value
@@ -60,8 +63,8 @@ class MyDbSequencerIT {
         Thread[] threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new Thread(() -> {
-                Long next = myDbSequencer.nextVal(testSequence);
-                assertTrue(next >= 0 && next < defaultMaxValue, "Next value should be between 0 and 9");
+                Long next = myDbSequencer.nextVal();
+                assertTrue(next >= 0 && next < maxValue, "Next value should be between 0 and 9");
                 count.merge(next, 1, Integer::sum); // Increment the count for the next value
             });
             threads[i].start();
@@ -78,7 +81,7 @@ class MyDbSequencerIT {
         }
 
         // Assert: Check that each value from 0 to 9 is repeated exactly 100 times
-        for (long i = 0; i < defaultMaxValue; i++) {
+        for (long i = 0; i < maxValue; i++) {
             assertTrue(count.containsKey(i), "Count should contain key: " + i);
             assertEquals(100, count.get(i), "Count for key " + i + " should be 100");
         }
@@ -89,8 +92,9 @@ class MyDbSequencerIT {
         // Arrange: Create a sequence and prepare a map to count occurrences
         int maxValue = 100;
         Map<Long, Integer> count = new ConcurrentHashMap<>(maxValue);
-        String testSequence = "my_sequence_concurrent_100_max_value";
-        myDbSequencer.createSequence(testSequence, maxValue);
+        MyDbSequencer myDbSequencer = new MyDbSequencer(this.jdbcTemplate, "my_sequence_concurrent_100_max_value",
+                maxValue);
+        myDbSequencer.init();
 
         // Act: Start threads, each calling nextVal on the sequence
         // and counting occurrences of each value
@@ -98,7 +102,7 @@ class MyDbSequencerIT {
         Thread[] threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new Thread(() -> {
-                Long next = myDbSequencer.nextVal(testSequence);
+                Long next = myDbSequencer.nextVal();
                 assertTrue(next >= 0 && next < maxValue, "Next value should be between 0 and 9");
                 count.merge(next, 1, Integer::sum); // Increment the count for the next value
             });
@@ -123,36 +127,75 @@ class MyDbSequencerIT {
     }
 
     @Test
-    void updateNextVal_defaultMax10_expectCycledValueBetween0to9() {
-        String testSequence = "my_sequence_update_next_val";
-        myDbSequencer.createSequence(testSequence);
+    void updateNextVal_withMax10_expectCycledValueBetween0to9() {
+        MyDbSequencer myDbSequencer = new MyDbSequencer(this.jdbcTemplate, "my_sequence_update_next_val", 10);
+        myDbSequencer.init();
 
-        for (int expectNext = 0; expectNext < 10; expectNext++) {
-            Long next = myDbSequencer.updateNextVal(testSequence);
+        for (int expectNext : List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)) {
+            Long next = myDbSequencer.updateNextVal();
             assertEquals(expectNext, next);
         }
-
-        Long result = myDbSequencer.updateNextVal(testSequence);
-        assertEquals(0L, result, "The 11th round of the nextVal should be cycled to 0");
     }
 
     @Test
     void nextVals_withMax100_expectCycledValueBetween0to99() {
-        String testSequence = "my_sequence_update_next_vals";
-        myDbSequencer.createSequence(testSequence, 100L);
+        MyDbSequencer myDbSequencer = new MyDbSequencer(this.jdbcTemplate, "my_sequence_update_next_vals", 100);
+        myDbSequencer.init();
 
         // Act and Assert
-        // Get 10 values (0 to 9)
-        List<Long> nextVals = myDbSequencer.nextVals(testSequence, 10);
+        // Get 10 values (1 to 10)
+        List<Long> nextVals = myDbSequencer.nextVals(10);
         assertEquals(10, nextVals.size(), "Should return 10 values");
-        for (int i = 0; i < 10; i++) {
-            assertEquals(i, nextVals.get(i), "Value at index " + i + " should be " + i);
+        for (int expectNext : List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) {
+            assertEquals(expectNext, nextVals.removeFirst());
         }
-        // Get another 10 values (10 to 19)
-        nextVals = myDbSequencer.nextVals(testSequence, 10);
-        assertEquals(10, nextVals.size(), "Should return another 10 values");
-        for (int i = 0; i < 10; i++) {
-            assertEquals(10 + i, nextVals.get(i), "Value at index " + i + " should be " + i);
+        // Get another 80 values (11 to 90)
+        nextVals = myDbSequencer.nextVals(80);
+        assertEquals(80, nextVals.size(), "Should return another 80 values");
+        for (int expectNext = 11; expectNext <= 90; expectNext++) {
+            assertEquals(expectNext, nextVals.removeFirst());
+        }
+
+        // Get 10 values (91 to 0)
+        nextVals = myDbSequencer.nextVals(10);
+        assertEquals(10, nextVals.size(), "Should return 10 values");
+        for (int expectNext : List.of(91, 92, 93, 94, 95, 96, 97, 98, 99, 0)) {
+            assertEquals(expectNext, nextVals.removeFirst());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 5, 7})
+    void updateNextVal_vs_nextVal_Success_shouldReturnSameValue(int increment) {
+        MyDbSequencer nextValSequencer =
+                new MyDbSequencer(this.jdbcTemplate, "vs_sequence_next_val", 100, increment);
+        nextValSequencer.init();
+        MyDbSequencer updateNextValSequencer =
+                new MyDbSequencer(this.jdbcTemplate, "vs_sequence_update_next_val", 100, increment);
+        updateNextValSequencer.init();
+
+        for (int i = 0; i < 1000; i++) {
+            Long nextVal = nextValSequencer.nextVal();
+            Long updateNextVal = updateNextValSequencer.updateNextVal();
+            assertEquals(nextVal, updateNextVal);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 5, 7})
+    void updateNextVals_vs_nextVals_Success_shouldReturnSameValue(int increment) {
+        MyDbSequencer nextValsSequencer = new MyDbSequencer(this.jdbcTemplate,
+                ("vs_sequence_next_vals" + increment), 100, increment);
+        nextValsSequencer.init();
+        MyDbSequencer updateNextValsSequencer = new MyDbSequencer(this.jdbcTemplate,
+                ("vs_sequence_update_next_vals" + increment), 100, increment);
+        updateNextValsSequencer.init();
+        int fetchSize = 10;
+
+        for (int i = 0; i < 1000; i++) {
+            List<Long> nextVal = nextValsSequencer.nextVals(fetchSize);
+            List<Long> updateNextVal = updateNextValsSequencer.updateNextVals(fetchSize);
+            assertEquals(nextVal, updateNextVal);
         }
     }
 
