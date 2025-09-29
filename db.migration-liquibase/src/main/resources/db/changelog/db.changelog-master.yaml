@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: 0001-create-student-table.sql
+      relativeToChangelogFile: true
+
