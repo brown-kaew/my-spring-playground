@@ -5,3 +5,6 @@ databaseChangeLog:
   - include:
       file: 0002-insert-student.sql
       relativeToChangelogFile: true
+  - include:
+      file: 0003-add-email-to-student.sql
+      relativeToChangelogFile: true
