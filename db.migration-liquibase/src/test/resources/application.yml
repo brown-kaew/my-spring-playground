@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: db.migration-liquibase
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydatabase
+#    username: secret
+#    password: verysecret
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+      platform: mysql
+  liquibase:
+    enabled: false
+  data:
+    jdbc:
+      repositories:
+        enabled: false
