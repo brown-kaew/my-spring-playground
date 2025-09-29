@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: db.migration-flyway
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydatabase
+    username: secret
+    password: verysecret
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+      platform: mysql
+  flyway:
+    enabled: true
+  data:
+    jdbc:
+      repositories:
+        enabled: true
