@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: JRA-1111_1
+      author: jungkaew
+      labels: sprint-10
+      comment: create student table
+      changes:
+        - tagDatabase:
+            tag: version_1.1
+        - createTable:
+            tableName: student
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: student
+  - changeSet:
+      id: JRA-1111_2
+      author: jungkaew
+      labels: sprint-10
+      comment: add student
+      changes:
+        - tagDatabase:
+            tag: version_1.1
+        - insert:
+            tableName: student
+            columns:
+              - column:
+                  name: name
+                  value: Alice
+      rollback:
+        - delete:
+            tableName: student
+            where: name = 'Alice'
