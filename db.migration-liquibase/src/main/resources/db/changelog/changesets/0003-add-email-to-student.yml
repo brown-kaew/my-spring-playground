@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: JRA-3333_1
+      author: jungkaew
+      labels: sprint-12
+      comment: add email column
+      changes:
+        - tagDatabase:
+            tag: version_1.3
+        - addColumn:
+            tableName: student
+            columns:
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+      rollback:
+        - dropColumn:
+            tableName: student
+            columnName: email
+  - changeSet:
+      id: JRA-3333_2
+      author: jungkaew
+      labels: sprint-12
+      comment: update email for existing students
+      changes:
+        - tagDatabase:
+            tag: version_1.3
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: email
+                  value: alice@example.com
+            where: name = 'Alice'
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: email
+                  value: bob@example.com
+            where: name = 'Bob'
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: email
+                  value: charlie@example.com
+            where: name = 'Charlie'
+      rollback:
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: email
+                  value: null
+            where: name IN ('Alice', 'Bob', 'Charlie')
+

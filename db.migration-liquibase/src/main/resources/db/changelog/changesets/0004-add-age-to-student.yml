@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: JRA-4444_1
+      author: jungkaew
+      labels: sprint-13
+      comment: add age column
+      changes:
+        - tagDatabase:
+            tag: version_1.4
+        - addColumn:
+            tableName: student
+            columns:
+              - column:
+                  name: age
+                  type: INT
+      rollback:
+        - dropColumn:
+            tableName: student
+            columnName: age
+  - changeSet:
+      id: JRA-4444_2
+      author: jungkaew
+      labels: sprint-13
+      comment: update age for existing students
+      changes:
+        - tagDatabase:
+            tag: version_1.3
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: age
+                  value: 22
+            where: name = 'Alice'
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: age
+                  value: 23
+            where: name = 'Bob'
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: age
+                  value: 24
+            where: name = 'Charlie'
+      rollback:
+        - update:
+            tableName: student
+            columns:
+              - column:
+                  name: age
+                  value: null
+            where: name IN ('Alice', 'Bob', 'Charlie')
+

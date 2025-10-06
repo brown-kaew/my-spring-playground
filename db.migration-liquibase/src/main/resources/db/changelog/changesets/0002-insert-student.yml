@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: JRA-2222_1
+      author: jungkaew
+      labels: sprint-11
+      comment: add more students
+      changes:
+        - tagDatabase:
+            tag: version_1.2
+        - insert:
+            tableName: student
+            columns:
+              - column:
+                  name: name
+                  value: Bob
+        - insert:
+            tableName: student
+            columns:
+              - column:
+                  name: name
+                  value: Charlie
+      rollback:
+        - delete:
+            tableName: student
+            where: name IN ('Bob', 'Charlie')
