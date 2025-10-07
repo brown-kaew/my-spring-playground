@@ -71,11 +71,12 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <configuration>
-                    <changeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</changeLogFile>
+                    <changeLogFile>db/changelog/db.changelog-master.yaml</changeLogFile>
                     <url>jdbc:mysql://localhost:3306/mydatabase</url>
                     <driver>com.mysql.cj.jdbc.Driver</driver>
                     <username>myuser</username>
                     <password>secret</password>
+                    <rollbackCount>1</rollbackCount>
                 </configuration>
             </plugin>
 		</plugins>
