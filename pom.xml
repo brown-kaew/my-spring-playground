@@ -15,6 +15,7 @@
         <module>mysql-experiment</module>
         <module>db.migration-flyway</module>
         <module>db.migration-liquibase</module>
+        <module>kafka-experiment</module>
     </modules>
 
 </project>
