@@ -12,8 +12,7 @@ public class MessageConsumer {
     Logger log = LoggerFactory.getLogger(MessageConsumer.class);
 
     @KafkaListener(topics = "test-topic", groupId = "test-group")
-    public void listen(ConsumerRecord<String, String> record) {
+    public void listen(ConsumerRecord<String, MessageDTO> record) {
         log.info("Received message: {}", record.value());
     }
 }
-

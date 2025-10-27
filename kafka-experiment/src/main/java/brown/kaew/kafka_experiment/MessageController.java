@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/messages")
 public class MessageController {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, MessageDTO> kafkaTemplate;
 
-    public MessageController(KafkaTemplate<String, String> kafkaTemplate) {
+    public MessageController(KafkaTemplate<String, MessageDTO> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
     @PostMapping
-    public String publishMessage(@RequestBody String message) {
+    public String publishMessage(@RequestBody MessageDTO message) {
         kafkaTemplate.send("test-topic", message);
         return "Message published: " + message;
     }

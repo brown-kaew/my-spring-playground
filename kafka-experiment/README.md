@@ -17,3 +17,8 @@ curl -X POST http://localhost:8080/api/messages \
   -H "Content-Type: application/json" \
   -d '"Hello, Kafka!"'
 ```
+```bash
+curl -X POST http://localhost:8080/api/messages \
+  -H "Content-Type: application/json" \
+  -d '{"content":"Hello from curl!","sender":"curl-user"}'
+```
